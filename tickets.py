@@ -64,13 +64,11 @@ def crear():
 def detalle(id_ticket):
     tickets = db.query(
         "SELECT t.*, e.nombre_estado, p.nivel_prio, c.nombre_cat, "
-        "u.nombre AS cliente, ua.nombre AS agente_nombre FROM Tickets t "
+        "u.nombre AS cliente FROM Tickets t "
         "JOIN Estados e ON t.id_estado = e.id_estado "
         "JOIN Prioridades p ON t.id_prio = p.id_prio "
         "JOIN Categorias c ON t.id_cat = c.id_cat "
         "JOIN Usuarios u ON t.id_usuario = u.id_usuario "
-        "LEFT JOIN Agentes a ON t.id_agente = a.id_agente "
-        "LEFT JOIN Usuarios ua ON a.id_agente = ua.id_usuario "
         "WHERE t.id_ticket = %s", (id_ticket,)
     )
     if not tickets:
@@ -80,7 +78,7 @@ def detalle(id_ticket):
         "SELECT h.*, uo.nombre AS origen, ud.nombre AS destino "
         "FROM Historial_Transferencias h "
         "LEFT JOIN Usuarios uo ON h.id_agente_origen = uo.id_usuario "
-        "JOIN Usuarios ud ON h.id_agente_dest = ud.id_usuario "
+        "LEFT JOIN Usuarios ud ON h.id_agente_dest = ud.id_usuario "
         "WHERE h.id_ticket = %s ORDER BY h.fecha_trans DESC", (id_ticket,)
     )
     return render_template('tickets/detalle.html',
