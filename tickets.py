@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+pythonfrom flask import Blueprint, render_template, request, session, redirect, url_for, flash
 import db
 
 tickets_bp = Blueprint('tickets', __name__)
@@ -64,7 +64,7 @@ def crear():
 def detalle(id_ticket):
     tickets = db.query(
         "SELECT t.*, e.nombre_estado, p.nivel_prio, c.nombre_cat, "
-        "u.nombre AS cliente FROM Tickets t "
+        "u.nombre AS cliente, NULL AS agente_nombre FROM Tickets t "
         "JOIN Estados e ON t.id_estado = e.id_estado "
         "JOIN Prioridades p ON t.id_prio = p.id_prio "
         "JOIN Categorias c ON t.id_cat = c.id_cat "
@@ -81,5 +81,7 @@ def detalle(id_ticket):
         "LEFT JOIN Usuarios ud ON h.id_agente_dest = ud.id_usuario "
         "WHERE h.id_ticket = %s ORDER BY h.fecha_trans DESC", (id_ticket,)
     )
+    agentes = db.query("SELECT id_usuario AS id_agente, nombre FROM Usuarios WHERE rol='Agente'")
     return render_template('tickets/detalle.html',
-        ticket=tickets[0], historial=historial)
+        ticket=tickets[0], historial=historial,
+        agentes=agentes, usuario=session['usuario'])
