@@ -39,80 +39,53 @@ def dashboard():
         total_activos=total_activos[0]['total'])
 
 
-#reemplaza callproc sp_asignar_agente
 @agentes_bp.route('/asignar/<int:id_ticket>', methods=['POST'])
 @login_required
 def asignar(id_ticket):
     id_agente = session['usuario']['id']
-    conn = db.get_connection()
-    cursor = conn.cursor()
     try:
-        cursor.execute(
+        db.query(
             "UPDATE Tickets SET id_agente = %s, id_estado = 2 WHERE id_ticket = %s",
-            (id_agente, id_ticket)
+            (id_agente, id_ticket), fetch=False
         )
-        conn.commit()
         flash('Ticket asignado correctamente')
     except Exception as e:
-        conn.rollback()
-        flash(f'Error al asignar ticket: {str(e)}')
-    finally:
-        cursor.close()
-        conn.close()
+        flash(f'Error al asignar: {str(e)}')
     return redirect(url_for('tickets.detalle', id_ticket=id_ticket))
 
 
-#reemplaza callproc sp_transferir_ticket
 @agentes_bp.route('/transferir/<int:id_ticket>', methods=['POST'])
 @login_required
 def transferir(id_ticket):
     id_agente_dest = request.form['id_agente_dest']
     motivo         = request.form.get('motivo', '')
     id_agente_orig = session['usuario']['id']
-
-    conn   = db.get_connection()
-    cursor = conn.cursor()
     try:
-        # 1. Guardar historial
-        cursor.execute(
-            """INSERT INTO HistorialTransferencias
-               (id_ticket, id_agente_origen, id_agente_destino, motivo, fecha_transferencia)
-               VALUES (%s, %s, %s, %s, NOW())""",
-            (id_ticket, id_agente_orig, id_agente_dest, motivo)
+        db.query(
+            "INSERT INTO HistorialTransferencias "
+            "(id_ticket, id_agente_origen, id_agente_destino, motivo, fecha_transferencia) "
+            "VALUES (%s, %s, %s, %s, NOW())",
+            (id_ticket, id_agente_orig, id_agente_dest, motivo), fetch=False
         )
-        # 2. Reasignar ticket
-        cursor.execute(
+        db.query(
             "UPDATE Tickets SET id_agente = %s, id_estado = 2 WHERE id_ticket = %s",
-            (id_agente_dest, id_ticket)
+            (id_agente_dest, id_ticket), fetch=False
         )
-        conn.commit()
         flash('Ticket transferido correctamente')
     except Exception as e:
-        conn.rollback()
-        flash(f'Error al transferir ticket: {str(e)}')
-    finally:
-        cursor.close()
-        conn.close()
+        flash(f'Error al transferir: {str(e)}')
     return redirect(url_for('tickets.detalle', id_ticket=id_ticket))
 
 
-#reemplaza callproc sp_cerrar_ticket
 @agentes_bp.route('/cerrar/<int:id_ticket>', methods=['POST'])
 @login_required
 def cerrar(id_ticket):
-    conn   = db.get_connection()
-    cursor = conn.cursor()
     try:
-        cursor.execute(
+        db.query(
             "UPDATE Tickets SET id_estado = 3 WHERE id_ticket = %s",
-            (id_ticket,)
+            (id_ticket,), fetch=False
         )
-        conn.commit()
         flash('Ticket cerrado correctamente')
     except Exception as e:
-        conn.rollback()
-        flash(f'Error al cerrar ticket: {str(e)}')
-    finally:
-        cursor.close()
-        conn.close()
+        flash(f'Error al cerrar: {str(e)}')
     return redirect(url_for('tickets.detalle', id_ticket=id_ticket))
