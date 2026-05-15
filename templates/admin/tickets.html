@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-ticket-perforated text-primary"></i> Todos los tickets</h4>
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Título</th>
+                    <th>Cliente</th>
+                    <th>Agente</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tickets %}
+                <tr>
+                    <td class="text-muted">#{{ t.id_ticket }}</td>
+                    <td class="fw-semibold">{{ t.titulo }}</td>
+                    <td>{{ t.cliente }}</td>
+                    <td>{{ t.agente_nombre or '—' }}</td>
+                    <td>
+                        {% if t.nivel_prio == 'Crítica' %}
+                            <span class="badge badge-critica">{{ t.nivel_prio }}</span>
+                        {% elif t.nivel_prio == 'Alta' %}
+                            <span class="badge bg-warning text-dark">{{ t.nivel_prio }}</span>
+                        {% else %}
+                            <span class="badge bg-light text-dark">{{ t.nivel_prio }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.nombre_estado == 'Abierto' %}
+                            <span class="badge badge-abierto">{{ t.nombre_estado }}</span>
+                        {% elif t.nombre_estado == 'En Proceso' %}
+                            <span class="badge badge-proceso">{{ t.nombre_estado }}</span>
+                        {% elif t.nombre_estado == 'Asignado' %}
+                            <span class="badge badge-asignado">{{ t.nombre_estado }}</span>
+                        {% else %}
+                            <span class="badge badge-cerrado">{{ t.nombre_estado }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">{{ t.fecha_creacion.strftime('%d/%m/%Y') if t.fecha_creacion }}</td>
+                    <td>
+                        <a href="/tickets/{{ t.id_ticket }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">No hay tickets registrados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
