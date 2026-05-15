@@ -89,5 +89,17 @@ def tickets():
         "LEFT JOIN Usuarios ua ON a.id_agente = ua.id_usuario "
         "ORDER BY t.fecha_creacion DESC"
     )
+    agentes = db.query("SELECT id_usuario AS id_agente, nombre FROM Usuarios WHERE rol='Agente'")
     return render_template('admin/tickets.html',
-        tickets=tickets, usuario=session['usuario'])
+        tickets=tickets, agentes=agentes, usuario=session['usuario'])
+
+@admin_bp.route('/tickets/asignar/<int:id_ticket>', methods=['POST'])
+@admin_required
+def asignar_ticket(id_ticket):
+    id_agente = request.form['id_agente']
+    db.query(
+        "UPDATE Tickets SET id_agente = %s, id_estado = 2 WHERE id_ticket = %s",
+        (id_agente, id_ticket), fetch=False
+    )
+    flash('Ticket asignado correctamente')
+    return redirect(url_for('admin.tickets'))

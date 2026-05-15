@@ -13,6 +13,7 @@
                     <th>Prioridad</th>
                     <th>Estado</th>
                     <th>Fecha</th>
+                    <th>Asignar</th>
                     <th></th>
                 </tr>
             </thead>
@@ -45,6 +46,21 @@
                     </td>
                     <td class="text-muted small">{{ t.fecha_creacion.strftime('%d/%m/%Y') if t.fecha_creacion }}</td>
                     <td>
+                        {% if t.nombre_estado != 'Cerrado' %}
+                        <form method="POST" action="/admin/tickets/asignar/{{ t.id_ticket }}" class="d-flex gap-1">
+                            <select name="id_agente" class="form-select form-select-sm" style="width:130px">
+                                <option value="">Agente...</option>
+                                {% for a in agentes %}
+                                <option value="{{ a.id_agente }}">{{ a.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="bi bi-person-check"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                    <td>
                         <a href="/tickets/{{ t.id_ticket }}" class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-eye"></i>
                         </a>
@@ -52,7 +68,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" class="text-center text-muted py-4">No hay tickets registrados</td>
+                    <td colspan="9" class="text-center text-muted py-4">No hay tickets registrados</td>
                 </tr>
                 {% endfor %}
             </tbody>
