@@ -1,4 +1,4 @@
-pythonfrom flask import Blueprint, render_template, request, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 import db
 
 tickets_bp = Blueprint('tickets', __name__)
