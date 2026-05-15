@@ -1,12 +1,9 @@
 import os
 from flask import Flask, session, redirect, url_for
 from config import Config
-from flask_session import Session
-import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-Session(app)
 
 # Blueprints
 from auth import auth_bp
@@ -32,7 +29,5 @@ def index():
         return redirect(url_for('tickets.dashboard'))
 
 if __name__ == '__main__':
-    os.makedirs('flask_session', exist_ok=True)
-    import os
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
