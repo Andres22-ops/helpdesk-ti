@@ -46,13 +46,12 @@ def crear():
         id_prio = request.form['id_prio']
         id_cat = request.form['id_cat']
         id_usuario = session['usuario']['id']
-        conn = db.get_connection()
-        cursor = conn.cursor()
-        cursor.callproc('sp_crear_ticket',
-            (titulo, descripcion, id_usuario, id_prio, id_cat, 0, ''))
-        conn.commit()
-        cursor.close()
-        conn.close()
+        db.query(
+            "INSERT INTO Tickets (titulo, descripcion, id_usuario, id_prio, id_cat, id_estado) "
+            "VALUES (%s, %s, %s, %s, %s, 1)",
+            (titulo, descripcion, id_usuario, id_prio, id_cat),
+            fetch=False
+        )
         flash('Ticket creado exitosamente')
         return redirect(url_for('tickets.dashboard'))
     prioridades = db.query("SELECT * FROM Prioridades")
