@@ -30,7 +30,8 @@ def dashboard():
         (id_agente,)
     )
     total_activos = db.query(
-        "SELECT COUNT(*) AS total FROM Tickets WHERE id_agente = %s AND id_estado != 3",
+        "SELECT COUNT(*) AS total FROM Tickets WHERE id_agente = %s AND id_estado != "
+        "(SELECT id_estado FROM Estados WHERE nombre_estado = 'Cerrado' LIMIT 1)",
         (id_agente,)
     )
     return render_template('tickets/lista.html',
@@ -45,7 +46,9 @@ def asignar(id_ticket):
     id_agente = session['usuario']['id']
     try:
         db.query(
-            "UPDATE Tickets SET id_agente = %s, id_estado = 2 WHERE id_ticket = %s",
+            "UPDATE Tickets SET id_agente = %s, id_estado = "
+            "(SELECT id_estado FROM Estados WHERE nombre_estado = 'Asignado' LIMIT 1) "
+            "WHERE id_ticket = %s",
             (id_agente, id_ticket), fetch=False
         )
         flash('Ticket asignado correctamente')
@@ -58,17 +61,11 @@ def asignar(id_ticket):
 @login_required
 def transferir(id_ticket):
     id_agente_dest = request.form['id_agente_dest']
-    motivo         = request.form.get('motivo', '')
-    id_agente_orig = session['usuario']['id']
     try:
         db.query(
-            "INSERT INTO HistorialTransferencias "
-            "(id_ticket, id_agente_origen, id_agente_destino, motivo, fecha_transferencia) "
-            "VALUES (%s, %s, %s, %s, NOW())",
-            (id_ticket, id_agente_orig, id_agente_dest, motivo), fetch=False
-        )
-        db.query(
-            "UPDATE Tickets SET id_agente = %s, id_estado = 2 WHERE id_ticket = %s",
+            "UPDATE Tickets SET id_agente = %s, id_estado = "
+            "(SELECT id_estado FROM Estados WHERE nombre_estado = 'Asignado' LIMIT 1) "
+            "WHERE id_ticket = %s",
             (id_agente_dest, id_ticket), fetch=False
         )
         flash('Ticket transferido correctamente')
@@ -82,7 +79,9 @@ def transferir(id_ticket):
 def cerrar(id_ticket):
     try:
         db.query(
-            "UPDATE Tickets SET id_estado = 3 WHERE id_ticket = %s",
+            "UPDATE Tickets SET id_estado = "
+            "(SELECT id_estado FROM Estados WHERE nombre_estado = 'Cerrado' LIMIT 1) "
+            "WHERE id_ticket = %s",
             (id_ticket,), fetch=False
         )
         flash('Ticket cerrado correctamente')
