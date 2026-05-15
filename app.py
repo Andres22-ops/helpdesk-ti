@@ -1,3 +1,4 @@
+import os
 from flask import Flask, session, redirect, url_for
 from config import Config
 from flask_session import Session
@@ -32,7 +33,6 @@ def index():
 
 if __name__ == '__main__':
     os.makedirs('flask_session', exist_ok=True)
-    
-import os
-port = int(os.environ.get('PORT', 5000))
-app.run(host='0.0.0.0', port=port, debug=False)
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
