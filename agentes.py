@@ -30,7 +30,8 @@ def dashboard():
         (id_agente,)
     )
     total_activos = db.query(
-        "SELECT fn_tickets_por_agente(%s) AS total", (id_agente,)
+    "SELECT COUNT(*) AS total FROM Tickets WHERE id_agente = %s AND id_estado != 3",
+    (id_agente,)
     )
     return render_template('tickets/lista.html',
         tickets=tickets,
