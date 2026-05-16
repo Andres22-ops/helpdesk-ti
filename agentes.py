@@ -61,7 +61,15 @@ def asignar(id_ticket):
 @login_required
 def transferir(id_ticket):
     id_agente_dest = request.form['id_agente_dest']
+    motivo         = request.form.get('motivo', '')
+    id_agente_orig = session['usuario']['id']
     try:
+        db.query(
+            "INSERT INTO Historial_Transferencias "
+            "(id_ticket, id_agente_origen, id_agente_destino, motivo, fecha_trans) "
+            "VALUES (%s, %s, %s, %s, NOW())",
+            (id_ticket, id_agente_orig, id_agente_dest, motivo), fetch=False
+        )
         db.query(
             "UPDATE Tickets SET id_agente = %s, id_estado = "
             "(SELECT id_estado FROM Estados WHERE nombre_estado = 'Asignado' LIMIT 1) "
