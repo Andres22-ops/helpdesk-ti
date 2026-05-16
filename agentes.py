@@ -63,12 +63,20 @@ def transferir(id_ticket):
     id_agente_dest = request.form['id_agente_dest']
     motivo         = request.form.get('motivo', '')
     id_agente_orig = session['usuario']['id']
+
+    # Si quien transfiere es Admin no está en Agentes, se pone NULL
+    es_agente = db.query(
+        "SELECT COUNT(*) AS total FROM Agentes WHERE id_agente = %s",
+        (id_agente_orig,)
+    )
+    origen = id_agente_orig if es_agente[0]['total'] > 0 else None
+
     try:
         db.query(
             "INSERT INTO Historial_Transferencias "
             "(id_ticket, id_agente_origen, id_agente_dest, motivo, fecha_trans) "
             "VALUES (%s, %s, %s, %s, NOW())",
-            (id_ticket, id_agente_orig, id_agente_dest, motivo), fetch=False
+            (id_ticket, origen, id_agente_dest, motivo), fetch=False
         )
         db.query(
             "UPDATE Tickets SET id_agente = %s, id_estado = "
