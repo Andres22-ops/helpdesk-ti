@@ -2,6 +2,7 @@
 {% block content %}
 <div class="row">
     <div class="col-md-8">
+        <!-- Info del ticket -->
         <div class="card p-4 mb-4">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
@@ -22,7 +23,8 @@
             <p>{{ ticket.descripcion }}</p>
             <div class="row mt-3 text-muted small">
                 <div class="col-md-4">
-                    <i class="bi bi-person"></i> Cliente: <strong>{{ ticket.cliente }}</strong>
+                    <i class="bi bi-person"></i> Cliente:
+                    <strong>{{ ticket.cliente }}</strong>
                 </div>
                 <div class="col-md-4">
                     <i class="bi bi-person-badge"></i> Agente:
@@ -35,13 +37,62 @@
             </div>
         </div>
 
-        <!-- Historial -->
+        <!-- Comentarios -->
+        <div class="card p-4 mb-4">
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-chat-left-text text-primary"></i> Comentarios
+            </h6>
+
+            {% if comentarios %}
+                {% for c in comentarios %}
+                <div class="d-flex mb-3">
+                    <div class="me-3">
+                        {% if c.rol == 'Agente' or c.rol == 'Admin' %}
+                            <span class="badge bg-primary">{{ c.rol }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ c.rol }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                            <strong class="small">{{ c.autor }}</strong>
+                            <span class="text-muted small">
+                                {{ c.fecha.strftime('%d/%m/%Y %H:%M') if c.fecha }}
+                            </span>
+                        </div>
+                        <p class="mb-0 mt-1">{{ c.comentario }}</p>
+                    </div>
+                </div>
+                {% if not loop.last %}<hr class="my-2">{% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="text-muted small">Sin comentarios aún.</p>
+            {% endif %}
+
+            <!-- Formulario comentar -->
+            {% if ticket.nombre_estado not in ('Cerrado', 'Resuelto') %}
+            <hr>
+            <form method="POST" action="/tickets/{{ ticket.id_ticket }}/comentar">
+                <textarea name="comentario" class="form-control mb-2"
+                    rows="2" placeholder="Escribe un comentario..." required></textarea>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-send"></i> Enviar comentario
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- Historial transferencias -->
         <div class="card p-4">
-            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history text-primary"></i> Historial de transferencias</h6>
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-clock-history text-primary"></i> Historial de transferencias
+            </h6>
             {% if historial %}
                 {% for h in historial %}
                 <div class="border-start border-primary ps-3 mb-3">
-                    <p class="mb-0 small text-muted">{{ h.fecha_trans.strftime('%d/%m/%Y %H:%M') if h.fecha_trans }}</p>
+                    <p class="mb-0 small text-muted">
+                        {{ h.fecha_trans.strftime('%d/%m/%Y %H:%M') if h.fecha_trans }}
+                    </p>
                     <p class="mb-0">
                         <strong>{{ h.origen or 'Sistema' }}</strong>
                         <i class="bi bi-arrow-right"></i>
@@ -60,9 +111,10 @@
     <div class="col-md-4">
         {% if usuario.rol in ('Agente', 'Admin') %}
         <div class="card p-4 mb-3">
-            <h6 class="fw-bold mb-3"><i class="bi bi-gear text-primary"></i> Acciones</h6>
+            <h6 class="fw-bold mb-3">
+                <i class="bi bi-gear text-primary"></i> Acciones
+            </h6>
 
-            <!-- Cerrar ticket -->
             {% if ticket.nombre_estado not in ('Cerrado', 'Resuelto') %}
             <form method="POST" action="/agentes/cerrar/{{ ticket.id_ticket }}">
                 <button type="submit" class="btn btn-danger w-100 mb-2"
@@ -70,10 +122,6 @@
                     <i class="bi bi-x-circle"></i> Cerrar ticket
                 </button>
             </form>
-            {% endif %}
-
-            <!-- Transferir -->
-            {% if ticket.nombre_estado not in ('Cerrado', 'Resuelto') %}
             <hr>
             <p class="small fw-semibold mb-2">Transferir a otro agente</p>
             <form method="POST" action="/agentes/transferir/{{ ticket.id_ticket }}">
