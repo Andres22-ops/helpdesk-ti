@@ -66,8 +66,7 @@ def transferir(id_ticket):
     try:
         db.query(
             "INSERT INTO Historial_Transferencias "
-            "(id_ticket, id_agente_origen, id_agente_destino, motivo, fecha_trans) "
-            "VALUES (%s, %s, %s, %s, NOW())",
+            "(id_ticket, id_agente_origen, id_agente_dest, motivo, fecha_trans) "
             (id_ticket, id_agente_orig, id_agente_dest, motivo), fetch=False
         )
         db.query(
